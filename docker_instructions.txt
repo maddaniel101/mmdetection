@@ -1,0 +1,35 @@
+# build an image with PyTorch 1.6, CUDA 10.1
+docker build -t mmdetection docker/
+
+# run it with
+docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmdetection/data mmdetection
+
+# Examples
+
+docker run --gpus all --shm-size=8g -it -v /home/vca/data:/mmdetection/data mmdetection
+
+
+# Execute isolated in  docker
+xhost +local:docker
+docker run --gpus all --shm-size=8g -it \
+    -e DISPLAY=$DISPLAY \
+    -privileged -v /dev/video0:/dev/video0 \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v /home/dan/data:/mmdetection/data \
+    -p 8888:8888 \
+    mmdetection bash
+
+#Inside the Container
+python -m pip install jupyterlab==3.1.4
+python -m pip install jupyterlab==2.2
+python -m pip install "ipykernel<5.5.2"
+apt update
+apt install wget -y
+
+jupyter-lab --ip 0.0.0.0 --port 8888 --no-browser --allow-root 
+
+
+jupyter-lab demo/inference_demo.ipynb --ip 0.0.0.0 --port 8888 --no-browser --allow-root 
+
+# low fps webcam
+python demo/webcam_demo.py configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py data/checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth --camera-id 0
